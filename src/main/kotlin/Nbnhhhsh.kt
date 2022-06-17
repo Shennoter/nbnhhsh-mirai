@@ -51,7 +51,12 @@ object Nbnhhsh : KotlinPlugin(
 fun nbnhhsh() {
     GlobalEventChannel.parentScope(GlobalScope).subscribeAlways<GroupMessageEvent> { event ->
         Config.customComm.forEach {
-            if (event.message.content.substring(0,it.length) == it) {
+            val maxLen = if(event.message.content.length < it.length){
+                event.message.content.length
+            }else{
+                it.length
+            }
+            if (event.message.content.substring(0,maxLen) == it) {
                 val abbr = event.message.content.substringAfter(it.last())
                 if (abbr.matches("[a-zA-Z0-9 ]+".toRegex())) { // 仅限数字和字母，否则丢弃消息
                     val url = "https://lab.magiconch.com/api/nbnhhsh/guess"
