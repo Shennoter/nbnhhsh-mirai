@@ -53,7 +53,7 @@ fun nbnhhsh() {
         Config.customComm.forEach {
             if (event.message.content.substring(0,it.length) == it) {
                 val abbr = event.message.content.substringAfter(it.last())
-                if (abbr.matches("[a-zA-Z0-9]+".toRegex())) { // 仅限数字和字母，否则丢弃消息
+                if (abbr.matches("[a-zA-Z0-9 ]+".toRegex())) { // 仅限数字和字母，否则丢弃消息
                     val url = "https://lab.magiconch.com/api/nbnhhsh/guess"
                     val json = "text=$abbr"
                     val JSON = "application/x-www-form-urlencoded; charset=utf-8".toMediaType()
