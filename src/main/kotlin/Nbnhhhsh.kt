@@ -31,7 +31,7 @@ object Nbnhhsh : KotlinPlugin(
     JvmPluginDescription(
         id = "pers.shennoter.nbnhhsh",
         name = "nbnhhsh",
-        version = "1.0.1",
+        version = "1.0.2",
     ) {
         author("Shennoter")
     }
