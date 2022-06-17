@@ -20,11 +20,18 @@ data class ResItem(
     val trans: List<String>
 )
 
+class Res2 : ArrayList<Res2Item>()
+
+data class Res2Item(
+    val inputting: List<String>,
+    val name: String
+)
+
 object Nbnhhsh : KotlinPlugin(
     JvmPluginDescription(
         id = "pers.shennoter.nbnhhsh",
         name = "nbnhhsh",
-        version = "1.0.0",
+        version = "1.0.1",
     ) {
         author("Shennoter")
     }
@@ -44,8 +51,8 @@ object Nbnhhsh : KotlinPlugin(
 fun nbnhhsh() {
     GlobalEventChannel.parentScope(GlobalScope).subscribeAlways<GroupMessageEvent> { event ->
         Config.customComm.forEach {
-            if (event.message.content.contains(it)) {
-                val abbr = event.message.content.substringAfter(" ")
+            if (event.message.content.substring(0,it.length) == it) {
+                val abbr = event.message.content.substringAfter(it.last())
                 if (abbr.matches("[a-zA-Z0-9]+".toRegex())) { // 仅限数字和字母，否则丢弃消息
                     val url = "https://lab.magiconch.com/api/nbnhhsh/guess"
                     val json = "text=$abbr"
@@ -64,33 +71,71 @@ fun nbnhhsh() {
                     }
                     val requestStr = response.body?.string()
                     response.close()
-                    if(requestStr!!.contains(",\"inputting\":[]}]")||requestStr == "[]") {
+                    if(requestStr == "[]") {
                         subject.sendMessage("找不到此缩写")
                         return@subscribeAlways
                     }
-                    val words = Gson().fromJson(requestStr, Res::class.java)
                     var text = ""
-                    if (Config.replyType) {
-                        words[0].trans.forEach { word ->
-                            if (word == words[0].trans.last()) {
-                                text += word
-                            } else {
-                                text = "$text$word\n"
+                    val words1 = Gson().fromJson(requestStr, Res::class.java)
+                    val words2 = Gson().fromJson(requestStr, Res2::class.java)
+                    if(requestStr!!.contains("inputting")){ // 第一种返回json格式
+                        if(words2[0].inputting.isEmpty()) { // 检查是否为空
+                            subject.sendMessage("找不到此缩写")
+                            return@subscribeAlways
+                        }
+                        if (Config.replyType) { // 转发消息模式
+                            words2[0].inputting.forEach { word ->
+                                if (word == words2[0].inputting.last()) {
+                                    text += word
+                                } else {
+                                    text = "$text$word\n"
+                                }
                             }
-                        }
-                        val forward: ForwardMessage = buildForwardMessage {
-                            add(event.sender, PlainText(text))
-                        }
-                        subject.sendMessage(forward)
-                    } else {
-                        words[0].trans.forEach { word ->
-                            if (word == words[0].trans.last()) {
-                                text += word
-                            } else {
-                                text = "$text$word、"
+                            val forward: ForwardMessage = buildForwardMessage {
+                                add(event.sender, PlainText(text))
                             }
+                            subject.sendMessage(forward)
+                            return@subscribeAlways
+                        } else { // 直接发送模式
+                            words2[0].inputting.forEach { word ->
+                                if (word == words2[0].inputting.last()) {
+                                    text += word
+                                } else {
+                                    text = "$text$word、"
+                                }
+                            }
+                            subject.sendMessage(text)
+                            return@subscribeAlways
                         }
-                        subject.sendMessage(text)
+                    }else { // 第二种返回json格式
+                        if(words1[0].trans.isEmpty()) { // 检查是否为空
+                            subject.sendMessage("找不到此缩写")
+                            return@subscribeAlways
+                        }
+                        if (Config.replyType) { // 转发消息模式
+                            words1[0].trans.forEach { word ->
+                                if (word == words1[0].trans.last()) {
+                                    text += word
+                                } else {
+                                    text = "$text$word\n"
+                                }
+                            }
+                            val forward: ForwardMessage = buildForwardMessage {
+                                add(event.sender, PlainText(text))
+                            }
+                            subject.sendMessage(forward)
+                            return@subscribeAlways
+                        } else { // 直接发送模式
+                            words1[0].trans.forEach { word ->
+                                if (word == words1[0].trans.last()) {
+                                    text += word
+                                } else {
+                                    text = "$text$word、"
+                                }
+                            }
+                            subject.sendMessage(text)
+                            return@subscribeAlways
+                        }
                     }
                 }
             }
