@@ -6,7 +6,7 @@ import kotlinx.coroutines.GlobalScope
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.event.GlobalEventChannel
-import net.mamoe.mirai.event.events.GroupMessageEvent
+import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.message.data.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -49,7 +49,7 @@ object Nbnhhsh : KotlinPlugin(
 
 @OptIn(DelicateCoroutinesApi::class)
 fun nbnhhsh() {
-    GlobalEventChannel.parentScope(GlobalScope).subscribeAlways<GroupMessageEvent> { event ->
+    GlobalEventChannel.parentScope(GlobalScope).subscribeAlways<MessageEvent> { event ->
         Config.customComm.forEach {
             val maxLen = if(event.message.content.length < it.length){
                 event.message.content.length
